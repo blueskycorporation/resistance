@@ -1,0 +1,12 @@
+extends layout
+
+block content
+	#instructions.block
+		p This is the rough framework for the Avalon/Resistance Game Manager.
+	#actions.block
+		p Create a new game or select an existing open game below
+		button(type="button", onclick="location.href='create_game';") Create
+		ul <!--This will be replaced by a generated list-->
+			li Game 1 created by Bob 
+			li Game 2 created by Josh
+			li Game 3 created by Bill
