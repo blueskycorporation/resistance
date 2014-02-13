@@ -1,0 +1,11 @@
+doctype html
+html
+	head
+		title= title
+		link(rel="stylesheet", href="/stylesheets/style.css")
+	body
+		div#main_header
+			h1= title
+			button(name="btn_home", onclick="location.href='/';", text="Home") Home
+		hr(class="hr1")
+		block content
