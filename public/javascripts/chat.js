@@ -22,12 +22,15 @@ function appendNewMessage(msg) {
  
 function appendNewUser(uName, notify) {
   $('select#users').append($('<option></option>').val(uName).html(uName));
+  
   if (notify && (myUserName !== uName) && (myUserName !== 'All'))
+    $('#msgWindow').append('User ' + uName + ' joined<br/>');
     $('span#msgWindow').append("<span class='adminMsg'>==>" + uName + " just joined <==<br/>")
 }
  
 function handleUserLeft(msg) {
     $("select#users option[value='" + msg.userName + "']").remove();
+	$('#msgWindow').append('User ' + msg.userName + ' left<br/>');
 }
  
 socket = io.connect("http://menos.gotdns.org:3000");
