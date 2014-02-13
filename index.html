@@ -1,0 +1,90 @@
+<script src="http://jeremy-pfeifer.fr/resistance/javascript/prototype.js" type="text/javascript"></script>
+<script src="http://jeremy-pfeifer.fr/resistance/javascript/scriptaculous.js" type="text/javascript"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+
+// connect to the server
+var socket = io.connect('http://72.200.199.165:8124');
+
+
+/*
+ * eventListeners
+ */
+
+socket.on('joinSuccess', function(data){
+	nickname = data;
+	$('nickname').disable();
+	$('join').disable();
+	$('nickname').setValue(nickname);
+});
+
+socket.on('newPlayer', function(data){
+	var playerName = data;
+	$('players').insert("<div id=\"" + playerName + "\">" + playerName + "</div>");
+});
+
+socket.on('voteFrom', function(data){
+	var voter = data.from;
+	var vote = data.vote;
+	
+	if(vote == 'approve'){
+		$(voter).setStyle({
+			backgroundColor: '#090'
+			});
+	}
+	else if(vote == 'reject'){
+		$(voter).setStyle({
+			backgroundColor: '#900'
+			});
+	}
+	else{
+		alert('unrecognized vote');
+	}
+	
+});
+
+/*
+socket.on('news', function (data) {
+	console.log(data);
+	socket.emit('my other event', { my: 'data' });
+});
+
+socket.on('this', function (data) {
+	console.log(data);
+	alert(data);
+});
+*/
+
+function sendVote(vote){
+	socket.emit('vote', nickname, vote);
+}
+
+
+function join(){
+	var nickname = $('nickname').getValue();
+	socket.emit('join', nickname);
+}
+
+var nickname = "";
+
+
+</script> 
+
+<html>
+	<header>
+		<title>Resistance</title>
+	</header>
+	<body>
+	
+		Name : <input type="text" name="nickname" id="nickname" /> <input type="button" name="join" id="join" value="Join" onclick="join()" /><br />
+		<input type="button" name="vote_approve" id="vote_approve" value="approve" onclick="sendVote('approve')" />
+		<input type="button" name="vote_reject" id="vote_reject" value="reject" onclick="sendVote('reject')" />
+		
+		<div id="players">
+			Players list: <br />
+			
+		</div>
+
+	</body>
+</html>
