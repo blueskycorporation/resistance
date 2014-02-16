@@ -1,0 +1,24 @@
+extends layout
+
+block append head
+
+block content
+	p To create a game select the various options and click Create Game
+	#options.block
+		input(type='radio', name='rb_resistance', checked=false)
+		|Resistance
+		input(type='radio', name='rb_avalon', checked=false)
+		|Avalon
+		hr
+		input(type='checkbox', name='ck_lady', checked=false)
+		|Lady
+		input(type='checkbox', name='ck_mission_timer', checked=false)
+		|Mission Timer
+		input(type='textbox', name='txt_mission_timer', class="timerbox")
+		input(type='checkbox', name='ck_vote_timer', checked=false)
+		|Vote Timer
+		input(type='textbox', name='txt_vote_timer', class="timerbox")
+	#actions.block
+		hr
+		button(name='btn_create_game', text='Create Game') Create Game
+		

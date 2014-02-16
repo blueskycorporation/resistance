@@ -1,0 +1,4 @@
+To run this:
+First install node.js using your preferred method.
+Then run 'npm install' from the main directory of this application.
+Then run 'node app.js' to launch the server.
