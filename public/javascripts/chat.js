@@ -1,5 +1,6 @@
 var socket;
 var myUserName;
+var host = window.location.protocol+'//'+window.location.host;
  
 function enableMsgInput(enable) {
   $('input#msg').prop('disabled', !enable);
@@ -33,7 +34,7 @@ function handleUserLeft(msg) {
 	$('#msgWindow').append('User ' + msg.userName + ' left<br/>');
 }
  
-socket = io.connect("http://menos.gotdns.org:3000");
+socket = io.connect(host);
  
 function setFeedback(fb) {
   $('span#feedback').html(fb);
