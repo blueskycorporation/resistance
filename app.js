@@ -14,6 +14,8 @@ var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
 
+var Game = require('./Game.js');
+
 var app = express();
 
 // all environments
@@ -45,12 +47,20 @@ var server = app.listen(app.get('port'), function(){
 });
 var io = socketio.listen(server);
 
-//Chat Logic
-//This is the test case chat implementation
 var clients = {};
  
 var socketsOfClients = {};
 io.sockets.on('connection', function(socket) {
+	
+	
+	// The client wants to know the list of current games
+	socket.on('getGameslist', function(data){
+		
+		console.log('Sending games list');
+		socket.emit('gamesList', {"currentGames": JSON.stringify(Object.keys(games))});
+	});
+	
+	
   socket.on('set username', function(userName) {
     // Is this an existing user name?
     if (clients[userName] === undefined) {
@@ -124,6 +134,14 @@ function userNameAlreadyInUse(sId, uName) {
     io.sockets.sockets[sId].emit('error', { "userNameInUse" : true });
   }, 500);
 }
+
+var games = {}
+
+
+// Create fake games list to test
+games[0] = new Game('Resistance', true, false);
+games[1] = new Game('Resistance', false, true);
+games[2] = new Game('Avalon', false, true);
 
 //Player Interaction
 //We will keep all of the player interactions here.

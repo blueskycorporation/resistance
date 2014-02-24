@@ -6,7 +6,8 @@ block content
 	#actions.block
 		p Create a new game or select an existing open game below
 		button(type="button", onclick="location.href='create_game';") Create
-		ul <!--This will be replaced by a generated list-->
+		button(type="button", onclick="getGamesList();") Refresh
+		ul#gamesList.ul <!--This will be replaced by a generated list-->
 			li Game 1 created by Bob 			
 			button(type="button", onclick="location.href='runninggame';") Join
 			li Game 2 created by Josh

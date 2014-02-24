@@ -3,10 +3,15 @@ html
 	block head
 		title= title
 		link(rel="stylesheet", href="/stylesheets/style.css")
+		script(src="/socket.io/socket.io.js")
+		script(src="/javascripts/resistance.js")
+		script(src="/libraries/prototype.js")
+		script(src="/libraries/scriptaculous.js")
+		
 	body
 		div#main_header
 			h1= title
 			button(name="btn_home", onclick="location.href='/';", text="Home") Home
-			button(name="btn_chat", onclick="location.href='/chat';", text="Chat") Chat			
+			<!--button(name="btn_chat", onclick="location.href='/chat';", text="Chat") Chat	-->		
 		hr(class="hr1")
 		block content
