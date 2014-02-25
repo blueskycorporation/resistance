@@ -52,17 +52,36 @@ var io = socketio.listen(server);
 var clients = {};
  
 var socketsOfClients = {};
+
 io.sockets.on('connection', function(socket) {
+	
+	/*
+	 * Handle client to server communication here
+	 */
 	
 	
 	// The client wants to know the list of current games
-	socket.on('getGameslist', function(data){
+	socket.on('getGamesList', function(data){
 		
 		console.log('Sending games list');
 		socket.emit('gamesList', {"currentGames": JSON.stringify(Object.keys(games))});
 	});
 	
+	// Create a game
+	socket.on('createGame', function(msg){
+		
+		data = JSON.parse(msg);
+		
+		console.log('create game  : ' + data.type + ' ' + data.plotCards + ' ' + data.lady);
+		//TODO bug: games.length appears to be undefined
+		games[games.length] = new Game(data.type, data.plotCards, data.lady);
+		
+	});
 	
+	
+	
+	// old logic for chat example
+	/*
   socket.on('set username', function(userName) {
     // Is this an existing user name?
     if (clients[userName] === undefined) {
@@ -109,9 +128,9 @@ io.sockets.on('connection', function(socket) {
     // relay this message to all the clients
  
     userLeft(uName);
-  })
+  })*/
 })
- 
+ /*
 function userJoined(uName) {
     Object.keys(socketsOfClients).forEach(function(sId) {
       io.sockets.sockets[sId].emit('userJoined', { "userName": uName });
@@ -136,7 +155,7 @@ function userNameAlreadyInUse(sId, uName) {
     io.sockets.sockets[sId].emit('error', { "userNameInUse" : true });
   }, 500);
 }
-
+*/
 var games = {}
 
 

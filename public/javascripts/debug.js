@@ -24,20 +24,6 @@ socket.on('welcome', function(msg) {
     appendData('welcome' + msg);
   });
 
-  $('message').keypress(function(e) {
-      if (e.keyCode == 13) {
-          sendMessage();
-          e.stopPropagation();
-          e.stopped = true;
-          e.preventDefault();
-      }
-  });
-  
-  $('data').keypress(function(e) {
-      if (e.keyCode == 13) {
-          sendMessage();
-          e.stopPropagation();
-          e.stopped = true;
-          e.preventDefault();
-      }
+socket.on('gamesList', function(msg) {
+    appendData('gamesList' + msg);
   });

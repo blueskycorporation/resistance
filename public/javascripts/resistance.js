@@ -6,7 +6,7 @@ socket = io.connect(host);
 
 
 function getGamesList() {
-    socket.emit('getGameslist', "list");
+    socket.emit('getGamesList', "list");
     console.log('Get games list');
 }
 
