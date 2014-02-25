@@ -8,6 +8,7 @@ var routes = require('./routes');
 var user = require('./routes/user');
 var create_game = require('./routes/create_game');
 var chat = require('./routes/chat');
+var debug = require('./routes/debug');
 var player = require('./routes/player');
 var runninggame = require('./routes/runninggame');
 var http = require('http');
@@ -39,6 +40,7 @@ app.get('/', routes.index);
 app.get('/create_game', create_game.main);
 app.get('/users', user.list);
 app.get('/chat', chat.main);
+app.get('/debug', debug.main);
 app.get('/player', player.main);
 app.get('/runninggame', runninggame.main);
 

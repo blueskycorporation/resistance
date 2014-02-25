@@ -1,0 +1,28 @@
+extends layout
+
+block append head
+
+  script(src="/libraries/prototype.js")
+  script(src="/libraries/scriptaculous.js")
+  script(src="/socket.io/socket.io.js")
+  script(src="/javascripts/debug.js")
+  
+
+block content
+  h1 Debug console
+
+  label(for="command") command line:
+
+  p
+  div#console
+
+  p
+  div
+    br
+    table
+      tr
+        td command / data: 
+          input#message(type="text", style="width: 400px")
+          input#data(type="text", style="width: 400px")
+          input(type="button", value="send", onclick="sendMessage();")
+          
