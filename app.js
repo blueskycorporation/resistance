@@ -15,7 +15,7 @@ var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
 
-var Game = require('./Game.js');
+var Game = require('./Game.js').Game;
 
 var app = express();
 
@@ -49,9 +49,14 @@ var server = app.listen(app.get('port'), function(){
 });
 var io = socketio.listen(server);
 
-var clients = {};
- 
-var socketsOfClients = {};
+/* Associative arrays.
+ * players[username] = socketId;
+ * socketsofPlayers[socketId] = username;
+ * 
+ * We should use a more advanced data structure in order to avoid data inconsistencies 
+ */
+var players = {};
+var socketsOfPlayers = {};
 
 io.sockets.on('connection', function(socket) {
 	
@@ -60,14 +65,16 @@ io.sockets.on('connection', function(socket) {
 	 */
 	
 	
-	// The client wants to know the list of current games
+	/* The client wants to know the list of current games */
 	socket.on('getGamesList', function(data){
 		
 		console.log('Sending games list');
-		socket.emit('gamesList', {"currentGames": JSON.stringify(Object.keys(games))});
+		//socket.emit('gamesList', {"currentGames": JSON.stringify(Object.keys(games))});
+		//TODO send games list
+		socket.emit('gamesList', '[{"type":"Resistance", "host":"John"},{"type":"Avalon", "host":"Bob"}]');
 	});
 	
-	// Create a game
+	/* Create a game */
 	socket.on('createGame', function(msg){
 		
 		data = JSON.parse(msg);
@@ -78,6 +85,34 @@ io.sockets.on('connection', function(socket) {
 		
 	});
 	
+	/* When a player logs into the server */
+	socket.on('login', function(msg){
+		data = JSON.parse(msg);
+		
+		var username = data.username
+		
+		if(username != null && players[username] == undefined){
+		
+			players[data.username] = socket.id;
+			socketsOfPlayers[socket.id] = username;
+			
+			//TODO notify player
+			// give him info about ongoing games, etc
+			
+			// TODO the notification playerJoined has to be sent when a player joins a room, not when he logs in.
+			playerJoined(username);
+			console.log('Player joined server: ' + username);
+		}
+		
+	});
+	
+	
+	/* Notify clients that a new player joined the game */
+	function playerJoined(username) {
+		Object.keys(socketsOfPlayers).forEach(function(sId) {
+			io.sockets.sockets[sId].emit('playerJoined', '{ "username": "' + username + '" }');
+    })
+}
 	
 	
 	// old logic for chat example

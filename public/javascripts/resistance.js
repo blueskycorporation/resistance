@@ -16,7 +16,7 @@ function setCurrentGamesList(currentGamesStr) {
 		child.remove();
 		
 	});
-	
+	//  TODO fix bug: JSON encoding
 	JSON.parse(currentGamesStr).forEach(function(name) {
 		
 		$('gamesList').insert("<li>" + name + "</li>");

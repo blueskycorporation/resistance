@@ -13,17 +13,22 @@ function appendData(data){
 }
 
 socket.on('gameCreated', function(msg) {
-    appendData('gameCreated' + msg);
+	data = JSON.parse(msg);
+    appendData('gameCreated ' + JSON.stringify(data));
   });
 
-socket.on('user joined', function(msg) {
-    appendData('user joined' + msg);
+socket.on('playerJoined', function(msg) {
+	data = JSON.parse(msg);
+    appendData('playerJoined ' + JSON.stringify(data));
   });
 
 socket.on('welcome', function(msg) {
-    appendData('welcome' + msg);
+	data = JSON.parse(msg);
+    appendData('welcome ' + JSON.stringify(data));
   });
 
 socket.on('gamesList', function(msg) {
-    appendData('gamesList' + msg);
+	
+	data = JSON.parse(msg);
+    appendData('gamesList ' + JSON.stringify(data));
   });
