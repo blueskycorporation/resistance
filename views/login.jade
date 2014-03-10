@@ -1,0 +1,18 @@
+doctype html
+html
+	block head
+		title= title
+		link(rel="stylesheet", href="/stylesheets/style.css")
+		script(src="/socket.io/socket.io.js")
+		script(src="/javascripts/jquery-1.7.2.min.js")
+		script(src="/javascripts/login.js")
+		
+	body
+		h1 Login
+		
+		label(for="userName") User name: 
+		input#username(type="text", size="30")
+		
+		input#login(type="button", value="log in", onclick="login()")
+		
+		span#feedback

@@ -9,11 +9,14 @@ var user = require('./routes/user');
 var create_game = require('./routes/create_game');
 var chat = require('./routes/chat');
 var debug = require('./routes/debug');
+var login = require('./routes/login');
 var player = require('./routes/player');
 var runninggame = require('./routes/runninggame');
 var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
+
+
 
 var Game = require('./Game.js').Game;
 
@@ -41,6 +44,7 @@ app.get('/create_game', create_game.main);
 app.get('/users', user.list);
 app.get('/chat', chat.main);
 app.get('/debug', debug.main);
+app.get('/login', login.main);
 app.get('/player', player.main);
 app.get('/runninggame', runninggame.main);
 
@@ -86,22 +90,34 @@ io.sockets.on('connection', function(socket) {
 	});
 	
 	/* When a player logs into the server */
-	socket.on('login', function(msg){
-		data = JSON.parse(msg);
+	socket.on('login', function(data){
+		//data = JSON.parse(msg);
 		
 		var username = data.username
 		
-		if(username != null && players[username] == undefined){
+		// If valid username
+		if(username != null){
+			
+			// If not already taken
+			if(players[username] == undefined){
 		
-			players[data.username] = socket.id;
-			socketsOfPlayers[socket.id] = username;
-			
-			//TODO notify player
-			// give him info about ongoing games, etc
-			
-			// TODO the notification playerJoined has to be sent when a player joins a room, not when he logs in.
-			playerJoined(username);
-			console.log('Player joined server: ' + username);
+				players[data.username] = socket.id;
+				socketsOfPlayers[socket.id] = username;
+				
+				//TODO notify player
+				// give him info about ongoing games, etc
+				loginResult(socket, 0);
+				
+				console.log('Player joined server: ' + username);
+			}
+			else{
+				loginResult(socket, 100);
+				console.log('Player already existing: ' + username);
+			}
+		}
+		else{
+			loginResult(socket, 101);
+			console.log('Invalid username: ' + username);
 		}
 		
 	});
@@ -111,8 +127,17 @@ io.sockets.on('connection', function(socket) {
 	function playerJoined(username) {
 		Object.keys(socketsOfPlayers).forEach(function(sId) {
 			io.sockets.sockets[sId].emit('playerJoined', '{ "username": "' + username + '" }');
-    })
-}
+		});
+	}
+	/* 
+	 * Notify client of the login result
+	 * 0:	success
+	 * 100:	username already in use
+	 * 101: username invalid
+	 */
+	function loginResult(socket, status) {
+		socket.emit('loginResult', { "status": status });
+	}
 	
 	
 	// old logic for chat example
@@ -164,7 +189,7 @@ io.sockets.on('connection', function(socket) {
  
     userLeft(uName);
   })*/
-})
+});
  /*
 function userJoined(uName) {
     Object.keys(socketsOfClients).forEach(function(sId) {
