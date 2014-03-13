@@ -5,6 +5,7 @@ exports.verify = function(req, res, next){
 	if(req.session.username == undefined){
 		res.render('login', { title: 'Avalon/Resistance Game' });
 	}
+	// Else, execute the usual function
 	else{
 		next();
 	}

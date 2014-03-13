@@ -125,8 +125,8 @@ if ('development' == app.get('env')) {
  * 
  * We should use a more advanced data structure in order to avoid data inconsistencies 
  */
-var players = {};
-var socketsOfPlayers = {};
+//var players = {};
+//var socketsOfPlayers = {};
 var clients = {};
 
 // When a client connects to the server
@@ -158,9 +158,11 @@ io.sockets.on('connection', function(socket) {
 	socket.on('getGamesList', function(data){
 		
 		console.log('Sending games list');
+		
+		sendGamesList(socket);
 		//socket.emit('gamesList', {"currentGames": JSON.stringify(Object.keys(games))});
 		//TODO send games list
-		socket.emit('gamesList', '[{"type":"Resistance", "host":"John"},{"type":"Avalon", "host":"Bob"}]');
+		//socket.emit('gamesList', '[{"type":"Resistance", "host":"John"},{"type":"Avalon", "host":"Bob"}]');
 	});
 	
 	/* Create a game */
@@ -174,7 +176,9 @@ io.sockets.on('connection', function(socket) {
 		
 	});
 	
-	/* When a player logs into the server */
+	/* 
+	 * When a player logs into the server 
+	 */
 	socket.on('login', function(data){
 		
 		var username = data.username
@@ -190,24 +194,17 @@ io.sockets.on('connection', function(socket) {
 				hs.session.username = username;
 				hs.session.save();
 				
-				
-				//players[data.username] = socket.id;
-				//socketsOfPlayers[socket.id] = username;
-				
-				
-				//TODO notify player
-				// give him info about ongoing games, etc
-				loginResult(socket, 0);
-				
+				//TODO notify other players too
+				sendLoginResult(socket, 0);
 				console.log('Player joined server: ' + hs.session.username);
 			}
 			else{
-				loginResult(socket, 100);
+				sendLoginResult(socket, 100);
 				console.log('Player already existing: ' + username);
 			}
 		}
 		else{
-			loginResult(socket, 101);
+			sendLoginResult(socket, 101);
 			console.log('Invalid username: ' + username);
 		}
 		
@@ -216,21 +213,36 @@ io.sockets.on('connection', function(socket) {
 	
 	/* Notify clients that a new player joined the game */
 	function playerJoined(username) {
-		Object.keys(socketsOfPlayers).forEach(function(sId) {
-			io.sockets.sockets[sId].emit('playerJoined', '{ "username": "' + username + '" }');
-		});
+		//Object.keys(socketsOfPlayers).forEach(function(sId) {
+			//io.sockets.sockets[sId].emit('playerJoined', '{ "username": "' + username + '" }');
+		//});
 	}
-	/* 
+	/** 
 	 * Notify client of the login result
 	 * 0:	success
 	 * 100:	username already in use
 	 * 101: username invalid
 	 */
-	function loginResult(socket, status) {
+	function sendLoginResult(socket, status){
 		socket.emit('loginResult', { "status": status });
 	}
 	
-	
+	/**
+	 * Send games in progress to client
+	 */
+	function sendGamesList(socket){
+		
+		result = {};
+		
+		var i = 0;
+		for(key in games){
+			result[i] = {"host": games[key].getHost(),"type": games[key].getType()};
+		
+			i = i + 1;
+		}
+		
+		socket.emit('gamesList', result);
+	}
 	// old logic for chat example
 	/*
   socket.on('set username', function(userName) {
@@ -327,9 +339,9 @@ var games = {}
 
 
 // Create fake games list to test
-games[0] = new Game('Resistance', true, false);
-games[1] = new Game('Resistance', false, true);
-games[2] = new Game('Avalon', false, true);
+games[0] = new Game('ADMIN', 'Resistance', true, false);
+games[1] = new Game('ADMIN', 'Resistance', false, true);
+games[2] = new Game('ADMIN', 'Avalon', false, true);
 
 //Player Interaction
 //We will keep all of the player interactions here.

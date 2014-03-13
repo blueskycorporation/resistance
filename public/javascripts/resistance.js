@@ -10,21 +10,23 @@ function getGamesList() {
     console.log('Get games list');
 }
 
-function setCurrentGamesList(currentGamesStr) {
-    //$('select#users >option').remove()
+function setCurrentGamesList(games) {
+	
+	//$('select#users >option').remove()
 	$('gamesList').childElements().each(function(child){
 		child.remove();
 		
 	});
-	//  TODO fix bug: JSON encoding
-	JSON.parse(currentGamesStr).forEach(function(name) {
+	
+	var i = 0;
+	for(key in games){
+		$('gamesList').insert("<li>" + games[key].type + "</li>");
 		
-		$('gamesList').insert("<li>" + name + "</li>");
-	});
+		i = i + 1;
+	}
 }
  
 
 socket.on('gamesList', function(data) {
-	setCurrentGamesList(data.currentGames)
-	
+	setCurrentGamesList(data)
 });

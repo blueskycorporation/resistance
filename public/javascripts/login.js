@@ -20,9 +20,7 @@ socket.on('loginResult', function(data) {
 	var result = data.status;
 	
 	if(result == 0){
-	
-		setFeedback("success");
-		
+		location.href='/';
 	}
 	else if(result == 100){
 		// USERNAME already used
