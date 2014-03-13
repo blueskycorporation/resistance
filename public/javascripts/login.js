@@ -1,5 +1,5 @@
 var socket;
-var myUserName;
+//var myUserName;
 var host = window.location.protocol+'//'+window.location.host;
 
 socket = io.connect(host);

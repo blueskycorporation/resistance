@@ -3,6 +3,13 @@
  */
 
 var express = require('express');
+var http = require('http');
+var path = require('path');
+var socketio = require('socket.io');
+var MemoryStore = express.session.MemoryStore,
+	sessionStore = new MemoryStore();
+
+// Screens
 var routes = require('./routes');
 var user = require('./routes/user');
 var create_game = require('./routes/create_game');
@@ -11,16 +18,12 @@ var debug = require('./routes/debug');
 var login = require('./routes/login');
 var player = require('./routes/player');
 var runninggame = require('./routes/runninggame');
-var http = require('http');
-var path = require('path');
-var socketio = require('socket.io');
-var MemoryStore = express.session.MemoryStore,
-	sessionStore = new MemoryStore();
 
-//var parseCookie = require('connect').utils.parseCookie;
+// Libraries
+var credentials = require('./credentials');
 
 /**
- * Load external classes
+ * External classes
  */
 
 var Game = require('./Game.js').Game;
@@ -95,15 +98,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 /**
  * Configure routes
+ * 
+ * app.get(path, middlewareFnction, function)
+ * path is the query path
+ * middlewareFunction receives the function object and decides to execute it according to the user credentials.
+ * function is an object referring to the appropiate file in '/routes'
  */
-app.get('/', routes.index);
-app.get('/create_game', create_game.main);
-app.get('/users', user.list);
-app.get('/chat', chat.main);
-app.get('/debug', debug.main);
-app.get('/login', login.main);
-app.get('/player', player.main);
-app.get('/runninggame', runninggame.main);
+app.get('/', credentials.verify, routes.index);
+app.get('/create_game', credentials.verify, create_game.main);
+app.get('/users', credentials.verify, user.list);
+app.get('/chat', credentials.verify, chat.main);
+app.get('/debug', credentials.verify, debug.main);
+app.get('/login', credentials.verify, login.main);
+app.get('/player', credentials.verify, player.main);
+app.get('/runninggame', credentials.verify, runninggame.main);
 app.use(app.router);
 
 // development only
@@ -119,6 +127,7 @@ if ('development' == app.get('env')) {
  */
 var players = {};
 var socketsOfPlayers = {};
+var clients = {};
 
 // When a client connects to the server
 io.sockets.on('connection', function(socket) {
@@ -167,7 +176,6 @@ io.sockets.on('connection', function(socket) {
 	
 	/* When a player logs into the server */
 	socket.on('login', function(data){
-		//data = JSON.parse(msg);
 		
 		var username = data.username
 		
@@ -175,16 +183,23 @@ io.sockets.on('connection', function(socket) {
 		if(username != null){
 			
 			// If not already taken
-			if(players[username] == undefined){
+			if(testUsernameUnicity(username)){
 		
-				players[data.username] = socket.id;
-				socketsOfPlayers[socket.id] = username;
+				// Store player
+				clients[hs.sessionID] = username;
+				hs.session.username = username;
+				hs.session.save();
+				
+				
+				//players[data.username] = socket.id;
+				//socketsOfPlayers[socket.id] = username;
+				
 				
 				//TODO notify player
 				// give him info about ongoing games, etc
 				loginResult(socket, 0);
 				
-				console.log('Player joined server: ' + username);
+				console.log('Player joined server: ' + hs.session.username);
 			}
 			else{
 				loginResult(socket, 100);
@@ -266,6 +281,22 @@ io.sockets.on('connection', function(socket) {
     userLeft(uName);
   })*/
 });
+
+/**
+ * Test if username is already taken.
+ * @param username username to test
+ * @return true if usernae is unique, false if username is already taken
+ */
+function testUsernameUnicity(username){
+	var taken = false;
+	for(sessionId in clients){
+		if(clients[sessionId] == username){
+			taken = true;
+		}
+	}
+	
+	return !taken;
+}
  /*
 function userJoined(uName) {
     Object.keys(socketsOfClients).forEach(function(sId) {
