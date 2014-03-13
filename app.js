@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * 
+ * Server initialization
+ * 
+ ******************************************************************************/
+
+
 /**
  * Module dependencies.
  */
@@ -119,15 +126,17 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-/* Associative arrays.
- * players[username] = socketId;
- * socketsofPlayers[socketId] = username;
- * 
- * We should use a more advanced data structure in order to avoid data inconsistencies 
- */
-//var players = {};
-//var socketsOfPlayers = {};
+// List of clients connected to the server.
+// clients[i] contains the sessionID of the client i.
 var clients = {};
+
+/*******************************************************************************
+ * 
+ * Event functions.
+ * These functions are called when the server receives a message from a client.
+ * 
+ ******************************************************************************/
+
 
 // When a client connects to the server
 io.sockets.on('connection', function(socket) {
@@ -147,12 +156,6 @@ io.sockets.on('connection', function(socket) {
 			hs.session.touch().save();
 		});
 	}, 60 * 1000);
-	
-	
-	/*
-	 * Handle client to server communication here
-	 */
-	
 	
 	/* The client wants to know the list of current games */
 	socket.on('getGamesList', function(data){
@@ -210,79 +213,8 @@ io.sockets.on('connection', function(socket) {
 		
 	});
 	
-	
-	/* Notify clients that a new player joined the game */
-	function playerJoined(username) {
-		//Object.keys(socketsOfPlayers).forEach(function(sId) {
-			//io.sockets.sockets[sId].emit('playerJoined', '{ "username": "' + username + '" }');
-		//});
-	}
-	/** 
-	 * Notify client of the login result
-	 * 0:	success
-	 * 100:	username already in use
-	 * 101: username invalid
-	 */
-	function sendLoginResult(socket, status){
-		socket.emit('loginResult', { "status": status });
-	}
-	
-	/**
-	 * Send games in progress to client
-	 */
-	function sendGamesList(socket){
-		
-		result = {};
-		
-		var i = 0;
-		for(key in games){
-			result[i] = {"host": games[key].getHost(),"type": games[key].getType()};
-		
-			i = i + 1;
-		}
-		
-		socket.emit('gamesList', result);
-	}
-	// old logic for chat example
+	//TODO handle client disconnection
 	/*
-  socket.on('set username', function(userName) {
-    // Is this an existing user name?
-    if (clients[userName] === undefined) {
-      // Does not exist ... so, proceed
-      clients[userName] = socket.id;
-      socketsOfClients[socket.id] = userName;
-      userNameAvailable(socket.id, userName);
-      userJoined(userName);
-    } else
-    if (clients[userName] === socket.id) {
-      // Ignore for now
-    } else {
-      userNameAlreadyInUse(socket.id, userName);
-    }
-  });
-  socket.on('message', function(msg) {
-    var srcUser;
-    if (msg.inferSrcUser) {
-      // Infer user name based on the socket id
-      srcUser = socketsOfClients[socket.id];
-    } else {
-      srcUser = msg.source;
-    }
- 
-    if (msg.target == "All") {
-      // broadcast
-      io.sockets.emit('message',
-          {"source": srcUser,
-           "message": msg.message,
-           "target": msg.target});
-    } else {
-      // Look up the socket id
-      io.sockets.sockets[clients[msg.target]].emit('message',
-          {"source": srcUser,
-           "message": msg.message,
-           "target": msg.target});
-    }
-  })
   socket.on('disconnect', function() {
     var uName = socketsOfClients[socket.id];
     delete socketsOfClients[socket.id];
@@ -293,6 +225,53 @@ io.sockets.on('connection', function(socket) {
     userLeft(uName);
   })*/
 });
+
+
+/*******************************************************************************
+ * 
+ * send functions.
+ * These functions are called when the server sends a message to a client.
+ * 
+ ******************************************************************************/
+
+/** 
+	* Notify client of the login result
+	* 0:	success
+	* 100:	username already in use
+	* 101: username invalid
+	*/
+function sendLoginResult(socket, status){
+	socket.emit('loginResult', { "status": status });
+}
+
+/**
+	* Send games in progress to client
+	*/
+function sendGamesList(socket){
+	
+	result = {};
+	
+	var i = 0;
+	for(key in games){
+		result[i] = {"host": games[key].getHost(),"type": games[key].getType()};
+	
+		i = i + 1;
+	}
+	
+	socket.emit('gamesList', result);
+}
+
+
+
+
+/*******************************************************************************
+ * 
+ * Utility functions
+ * The rest of the logic.
+ * May be moved in the future for more clarity
+ * 
+ ******************************************************************************/
+
 
 /**
  * Test if username is already taken.
@@ -309,36 +288,14 @@ function testUsernameUnicity(username){
 	
 	return !taken;
 }
- /*
-function userJoined(uName) {
-    Object.keys(socketsOfClients).forEach(function(sId) {
-      io.sockets.sockets[sId].emit('userJoined', { "userName": uName });
-    })
-}
- 
-function userLeft(uName) {
-    io.sockets.emit('userLeft', { "userName": uName });
-}
- 
-function userNameAvailable(sId, uName) {
-  setTimeout(function() {
- 
-    console.log('Sending welcome msg to ' + uName + ' at ' + sId);
-    io.sockets.sockets[sId].emit('welcome', { "userName" : uName, "currentUsers": JSON.stringify(Object.keys(clients)) });
- 
-  }, 500);
-}
- 
-function userNameAlreadyInUse(sId, uName) {
-  setTimeout(function() {
-    io.sockets.sockets[sId].emit('error', { "userNameInUse" : true });
-  }, 500);
-}
-*/
+
+
 var games = {}
 
 
-// Create fake games list to test
+// Create fake games list to test.
+// The first parameter should be the username of the player creating the game.
+// Since these are dummy examples, ADMIN is considered as the user name.
 games[0] = new Game('ADMIN', 'Resistance', true, false);
 games[1] = new Game('ADMIN', 'Resistance', false, true);
 games[2] = new Game('ADMIN', 'Avalon', false, true);
